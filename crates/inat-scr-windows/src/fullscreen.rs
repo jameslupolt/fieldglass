@@ -31,7 +31,7 @@ use inat_core::CachedPhoto;
 use inat_core::PhotoLicense;
 
 thread_local! {
-    static WINDOW_HWNDS: RefCell<Vec<HWND>> = RefCell::new(Vec::new());
+    static WINDOW_HWNDS: RefCell<Vec<HWND>> = const { RefCell::new(Vec::new()) };
 }
 
 // ---------------------------------------------------------------------------
@@ -516,10 +516,11 @@ unsafe fn paint(state: &State, hdc: HDC) {
             );
 
             // Crossfade: blend next photo on top with increasing alpha
-            if state.transitioning {
-                if let Some(ref next) = state.next {
+            if state.transitioning
+                && let Some(ref next) = state.next
+            {
                     let alpha =
-                        ((state.transition_step as u32 * 255) / CROSSFADE_STEPS).min(255) as u8;
+                        (state.transition_step * 255 / CROSSFADE_STEPS).min(255) as u8;
                     let (nd, ns) = photo_rects(
                         next.dib.width,
                         next.dib.height,
@@ -553,7 +554,6 @@ unsafe fn paint(state: &State, hdc: HDC) {
                         nsh,
                         blend,
                     );
-                }
             }
         }
 
@@ -738,17 +738,20 @@ fn load_photo_dib(screen_dc: HDC, path: &Path) -> Result<DibImage> {
 fn create_overlay_font(screen_h: i32) -> HFONT {
     // ~1.5% of screen height, minimum 16px
     let font_height = -((screen_h as f64 * 0.015) as i32).max(16);
-    let mut lf = LOGFONTW::default();
-    lf.lfHeight = font_height;
-    lf.lfWeight = 400; // FW_NORMAL
-    lf.lfQuality = FONT_QUALITY(5); // CLEARTYPE_QUALITY
-    let face = "Segoe UI";
-    for (i, ch) in face.encode_utf16().enumerate() {
+    let mut face_name = [0u16; 32];
+    for (i, ch) in "Segoe UI".encode_utf16().enumerate() {
         if i >= 31 {
             break;
         }
-        lf.lfFaceName[i] = ch;
+        face_name[i] = ch;
     }
+    let lf = LOGFONTW {
+        lfHeight: font_height,
+        lfWeight: 400, // FW_NORMAL
+        lfQuality: FONT_QUALITY(5), // CLEARTYPE_QUALITY
+        lfFaceName: face_name,
+        ..Default::default()
+    };
     unsafe { CreateFontIndirectW(&lf) }
 }
 
@@ -1005,7 +1008,7 @@ fn monitor_photo_queue(
 }
 
 fn effective_aspect_ratio_mode(mode: AspectRatioMode, license_code: &str) -> AspectRatioMode {
-    if PhotoLicense::from_code(license_code).map_or(false, |license| license.is_no_derivatives()) {
+    if PhotoLicense::from_code(license_code).is_some_and(|license| license.is_no_derivatives()) {
         AspectRatioMode::Contain
     } else {
         mode

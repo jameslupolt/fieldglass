@@ -146,9 +146,9 @@ fn parse_mode(args: &[String]) -> ScreensaverMode {
             return ScreensaverMode::Configure;
         }
 
-        if flag.starts_with('p') {
-            let hwnd_str = if flag.len() > 1 {
-                flag[1..].trim_start_matches(':')
+        if let Some(rest) = flag.strip_prefix('p') {
+            let hwnd_str = if !rest.is_empty() {
+                rest.trim_start_matches(':')
             } else if let Some(next) = args.get(i + 1) {
                 next.as_str()
             } else {
