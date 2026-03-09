@@ -1,0 +1,42 @@
+[package]
+name = "inat-companion"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+description = "Field Glass companion — settings, cache management, and system tray"
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+# Tauri framework
+tauri = { version = "2", features = ["tray-icon", "protocol-asset"] }
+
+# Tauri plugins
+tauri-plugin-shell = "2"
+tauri-plugin-autostart = "2"
+tauri-plugin-store = "2"
+
+# Shared core library
+inat-core.workspace = true
+
+# Serialization
+serde.workspace = true
+serde_json.workspace = true
+
+# Async runtime
+tokio.workspace = true
+
+# Error handling
+anyhow.workspace = true
+
+# HTTP (for image downloads)
+reqwest.workspace = true
+
+# Time
+chrono.workspace = true
+
+# Logging
+tracing.workspace = true
+tracing-subscriber.workspace = true

@@ -1,0 +1,49 @@
+{
+  "$schema": "https://raw.githubusercontent.com/nicoverbruggen/tauri2-json-schema/main/schema.json",
+  "productName": "Field Glass",
+  "version": "0.1.0",
+  "identifier": "org.fieldglass.companion",
+  "build": {
+    "beforeBuildCommand": "npm run build --prefix ../frontend",
+    "beforeDevCommand": "npm run dev --prefix ../frontend",
+    "devUrl": "http://localhost:5173",
+    "frontendDist": "../../frontend/dist"
+  },
+  "app": {
+    "security": {
+      "csp": "default-src 'self'; img-src 'self' asset: http://asset.localhost https://asset.localhost https://inaturalist-open-data.s3.amazonaws.com https://static.inaturalist.org; style-src 'self' 'unsafe-inline'",
+      "assetProtocol": {
+        "enable": true,
+        "scope": {
+          "allow": ["**"],
+          "requireLiteralLeadingDot": false
+        }
+      }
+    },
+    "windows": [
+      {
+        "label": "main",
+        "title": "Field Glass",
+        "width": 720,
+        "height": 640,
+        "resizable": true,
+        "center": true,
+        "visible": true
+      }
+    ],
+    "trayIcon": {
+      "iconPath": "icons/icon.png",
+      "iconAsTemplate": true
+    }
+  },
+  "bundle": {
+    "active": true,
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.ico"
+    ]
+  },
+  "plugins": {}
+}

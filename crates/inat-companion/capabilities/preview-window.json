@@ -1,0 +1,9 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "preview-window",
+  "description": "Minimal permissions for the screensaver preview window — no network, no filesystem write",
+  "windows": ["preview"],
+  "permissions": [
+    "core:default"
+  ]
+}
