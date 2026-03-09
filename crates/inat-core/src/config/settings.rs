@@ -51,12 +51,18 @@ pub struct Settings {
     pub exclude_non_organism: bool,
 
     // -- Cache --
-    /// Target minutes without repeating a photo.
+    /// Legacy no-repeat preference retained for compatibility.
     #[serde(default = "default_no_repeat_minutes")]
     pub no_repeat_minutes: u32,
-    /// Number of monitors (used for cache size calculation).
+    /// Legacy monitor count retained for compatibility.
     #[serde(default = "default_monitor_count")]
     pub monitor_count: u32,
+    /// Target number of photos to keep in cache.
+    #[serde(default = "default_cache_max_items")]
+    pub cache_max_items: u32,
+    /// Automatic cache refresh interval in minutes. Set to 0 to disable.
+    #[serde(default = "default_cache_refresh_interval_minutes")]
+    pub cache_refresh_interval_minutes: u32,
 
     // -- Geocoding --
     /// Which geocoding backend to use.
@@ -95,6 +101,12 @@ fn default_no_repeat_minutes() -> u32 {
 fn default_monitor_count() -> u32 {
     2
 }
+fn default_cache_max_items() -> u32 {
+    240
+}
+fn default_cache_refresh_interval_minutes() -> u32 {
+    60
+}
 
 impl Default for Settings {
     fn default() -> Self {
@@ -111,6 +123,8 @@ impl Default for Settings {
             exclude_non_organism: true,
             no_repeat_minutes: default_no_repeat_minutes(),
             monitor_count: default_monitor_count(),
+            cache_max_items: default_cache_max_items(),
+            cache_refresh_interval_minutes: default_cache_refresh_interval_minutes(),
             geocoder_backend: GeocoderBackend::default(),
             auto_start: false,
         }
@@ -120,10 +134,9 @@ impl Default for Settings {
 impl Settings {
     /// Compute the required number of cached images for the current settings.
     ///
-    /// `required_images = (no_repeat_minutes × 60 × monitor_count) / photo_duration_secs`
+    /// Uses the explicit user-defined cache size target.
     pub fn required_cache_size(&self) -> u32 {
-        let total_seconds = self.no_repeat_minutes * 60 * self.monitor_count;
-        total_seconds / self.photo_duration_secs.max(1)
+        self.cache_max_items.max(1)
     }
 
     /// Load settings from a JSON file. Returns defaults if the file doesn't exist.
@@ -140,11 +153,13 @@ impl Settings {
 
     /// Save settings to a JSON file (atomic write via rename).
     pub fn save(&self, path: &Path) -> Result<()> {
-        let contents = serde_json::to_string_pretty(self)
-            .context("Failed to serialize settings")?;
+        let contents =
+            serde_json::to_string_pretty(self).context("Failed to serialize settings")?;
 
         // Atomic write: write to temp file, then rename
-        let dir = path.parent().context("Settings path has no parent directory")?;
+        let dir = path
+            .parent()
+            .context("Settings path has no parent directory")?;
         std::fs::create_dir_all(dir)
             .with_context(|| format!("Failed to create settings directory {}", dir.display()))?;
 
@@ -181,7 +196,16 @@ mod tests {
             monitor_count: 1,
             ..Settings::default()
         };
-        assert_eq!(settings.required_cache_size(), 120);
+        assert_eq!(settings.required_cache_size(), 240);
+    }
+
+    #[test]
+    fn explicit_cache_size() {
+        let settings = Settings {
+            cache_max_items: 500,
+            ..Settings::default()
+        };
+        assert_eq!(settings.required_cache_size(), 500);
     }
 
     #[test]

@@ -92,27 +92,53 @@ export default function CacheStatusPanel({ settings, onUpdate }: Props) {
         </div>
       )}
 
-      <div className="mb-4">
-        <label className="mb-1 block text-sm text-gray-300">
-          No-Repeat Time: {settings.no_repeat_minutes} min
-        </label>
-        <input
-          type="range"
-          min={15}
-          max={60}
-          step={5}
-          value={settings.no_repeat_minutes}
-          onChange={(e) =>
-            onUpdate({
-              ...settings,
-              no_repeat_minutes: Number(e.target.value),
-            })
-          }
-          className="w-full accent-green-500"
-        />
-        <div className="mt-1 flex justify-between text-xs text-gray-600">
-          <span>15 min</span>
-          <span>60 min</span>
+      <div className="mb-4 space-y-4">
+        <div>
+          <label className="mb-1 block text-sm text-gray-300">
+            Cache Items: {settings.cache_max_items}
+          </label>
+          <input
+            type="range"
+            min={50}
+            max={1000}
+            step={25}
+            value={settings.cache_max_items}
+            onChange={(e) =>
+              onUpdate({
+                ...settings,
+                cache_max_items: Number(e.target.value),
+              })
+            }
+            className="w-full accent-green-500"
+          />
+          <div className="mt-1 flex justify-between text-xs text-gray-600">
+            <span>50</span>
+            <span>1000</span>
+          </div>
+        </div>
+
+        <div>
+          <label className="mb-1 block text-sm text-gray-300">
+            Auto Refresh Interval: {settings.cache_refresh_interval_minutes} min
+          </label>
+          <input
+            type="range"
+            min={0}
+            max={240}
+            step={15}
+            value={settings.cache_refresh_interval_minutes}
+            onChange={(e) =>
+              onUpdate({
+                ...settings,
+                cache_refresh_interval_minutes: Number(e.target.value),
+              })
+            }
+            className="w-full accent-green-500"
+          />
+          <div className="mt-1 flex justify-between text-xs text-gray-600">
+            <span>Off</span>
+            <span>4 hr</span>
+          </div>
         </div>
       </div>
 

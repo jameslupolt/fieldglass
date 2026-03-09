@@ -37,3 +37,9 @@ pub fn get_photo_details(photo_id: u64) -> Result<Option<CachedPhoto>, String> {
         photo
     }))
 }
+
+#[tauri::command]
+pub fn delete_cached_photo(photo_id: u64) -> Result<bool, String> {
+    let manager = CacheManager::new().map_err(|e| e.to_string())?;
+    manager.remove_photo(photo_id).map_err(|e| e.to_string())
+}

@@ -21,6 +21,7 @@ use windows::core::w;
 use windows::Win32::Foundation::*;
 use windows::Win32::Graphics::Gdi::*;
 use windows::Win32::System::LibraryLoader::GetModuleHandleW;
+use windows::Win32::System::Threading::CreateMutexW;
 use windows::Win32::UI::HiDpi::{SetProcessDpiAwareness, PROCESS_SYSTEM_DPI_AWARE};
 use windows::Win32::UI::WindowsAndMessaging::*;
 
@@ -201,6 +202,16 @@ impl Drop for State {
 /// 3. Load the first cached photo and begin cycling via `WM_TIMER`.
 /// 4. Exit on any user input (mouse / keyboard).
 pub fn run() -> Result<()> {
+    let instance_mutex = unsafe { CreateMutexW(None, true, w!("FieldGlass.Screensaver.Singleton")) }
+        .context("CreateMutexW failed")?;
+    if unsafe { GetLastError() } == ERROR_ALREADY_EXISTS {
+        unsafe {
+            let _ = CloseHandle(instance_mutex);
+        }
+        tracing::warn!("Another FieldGlass screensaver instance is already running");
+        return Ok(());
+    }
+
     // Load settings
     let settings_path = Settings::default_path().context("Failed to determine settings path")?;
     let settings = Settings::load(&settings_path).context("Failed to load settings")?;
@@ -394,6 +405,10 @@ pub fn run() -> Result<()> {
         ShowCursor(true);
     }
 
+    unsafe {
+        let _ = CloseHandle(instance_mutex);
+    }
+
     Ok(())
 }
 
@@ -409,6 +424,10 @@ unsafe extern "system" fn wndproc(hwnd: HWND, msg: u32, wparam: WPARAM, lparam: 
                 drop(Box::from_raw(ptr));
             }
             unregister_window(hwnd);
+            let has_windows = WINDOW_HWNDS.with(|windows| !windows.borrow().is_empty());
+            if !has_windows {
+                PostQuitMessage(0);
+            }
             return LRESULT(0);
         }
 
@@ -454,6 +473,25 @@ unsafe extern "system" fn wndproc(hwnd: HWND, msg: u32, wparam: WPARAM, lparam: 
                 tracing::debug!("Screensaver dismissed (key/click)");
                 dismiss_all_windows();
                 LRESULT(0)
+            }
+
+            WM_CLOSE => {
+                tracing::debug!("Screensaver dismissed (close)");
+                dismiss_all_windows();
+                LRESULT(0)
+            }
+
+            WM_ACTIVATEAPP => {
+                if wparam.0 == 0 {
+                    tracing::debug!("Screensaver dismissed (app deactivated)");
+                    dismiss_all_windows();
+                }
+                LRESULT(0)
+            }
+
+            WM_QUERYENDSESSION | WM_ENDSESSION => {
+                dismiss_all_windows();
+                LRESULT(1)
             }
 
             _ => DefWindowProcW(hwnd, msg, wparam, lparam),

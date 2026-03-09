@@ -243,6 +243,24 @@ impl CacheManager {
         }
     }
 
+    pub fn remove_photo(&self, photo_id: u64) -> Result<bool> {
+        let Some(photo) = self
+            .metadata
+            .get_photo_by_id(photo_id)
+            .with_context(|| format!("Failed to get photo {photo_id} for deletion"))?
+        else {
+            return Ok(false);
+        };
+
+        self.storage
+            .delete_relative_path(&photo.file_path)
+            .with_context(|| format!("Failed to delete image for photo {photo_id}"))?;
+
+        self.metadata
+            .delete_photo_by_id(photo_id)
+            .with_context(|| format!("Failed to delete metadata for photo {photo_id}"))
+    }
+
     /// Get taxon representation counts (for diversity scoring).
     pub fn get_taxon_counts(&self) -> Result<std::collections::HashMap<u64, u32>> {
         self.metadata.get_taxon_counts()
@@ -283,7 +301,6 @@ impl CacheManager {
         tracing::info!(deleted, "Cleared all cached photos");
         Ok(deleted)
     }
-
 }
 
 #[cfg(test)]
