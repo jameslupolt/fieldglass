@@ -25,6 +25,8 @@ export interface Settings {
   exclude_non_organism: boolean;
   no_repeat_minutes: number;
   monitor_count: number;
+  cache_max_items: number;
+  cache_refresh_interval_minutes: number;
   geocoder_backend: GeocoderBackend;
   auto_start: boolean;
 }

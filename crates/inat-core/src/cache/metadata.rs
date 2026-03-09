@@ -1,9 +1,9 @@
 use std::collections::HashMap;
 use std::path::Path;
 
-use anyhow::{Context, Result, anyhow};
+use anyhow::{anyhow, Context, Result};
 use chrono::{DateTime, Utc};
-use rusqlite::{Connection, OpenFlags, OptionalExtension, params};
+use rusqlite::{params, Connection, OpenFlags, OptionalExtension};
 
 use crate::types::CachedPhoto;
 
@@ -236,11 +236,29 @@ impl MetadataStore {
             .context("Failed to prepare get_photo_by_id query")?;
 
         let photo = stmt
-            .query_row(params![u64_to_i64(photo_id, "photo_id")?], cached_photo_from_row)
+            .query_row(
+                params![u64_to_i64(photo_id, "photo_id")?],
+                cached_photo_from_row,
+            )
             .optional()
             .context("Failed to execute get_photo_by_id query")?;
 
         Ok(photo)
+    }
+
+    pub fn delete_photo_by_id(&self, photo_id: u64) -> Result<bool> {
+        let deleted = self
+            .conn
+            .execute(
+                "
+                DELETE FROM cached_photos
+                WHERE photo_id = ?
+                ",
+                params![u64_to_i64(photo_id, "photo_id")?],
+            )
+            .context("Failed to delete photo by id")?;
+
+        Ok(deleted > 0)
     }
 
     pub fn mark_pending_deletion(&self, photo_id: u64) -> Result<()> {
@@ -408,7 +426,6 @@ impl MetadataStore {
             .context("Failed to delete all cached photos")?;
         Ok(deleted as u64)
     }
-
 }
 
 fn cached_photo_from_row(row: &rusqlite::Row<'_>) -> rusqlite::Result<CachedPhoto> {

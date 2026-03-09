@@ -52,3 +52,7 @@ export async function getPhotoDetails(
     photoId,
   });
 }
+
+export async function deleteCachedPhoto(photoId: number): Promise<boolean> {
+  return invoke<boolean>("delete_cached_photo", { photoId });
+}

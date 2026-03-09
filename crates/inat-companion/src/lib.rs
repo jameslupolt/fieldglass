@@ -8,6 +8,9 @@
 mod commands;
 mod tray;
 
+use std::time::Duration;
+
+use inat_core::Settings;
 use tracing_subscriber::EnvFilter;
 
 pub fn run() {
@@ -24,6 +27,7 @@ pub fn run() {
         .plugin(tauri_plugin_store::Builder::default().build())
         .setup(|app| {
             tray::create_tray(app)?;
+            start_auto_refresh_loop();
             tracing::info!("Field Glass started");
             Ok(())
         })
@@ -37,7 +41,62 @@ pub fn run() {
             commands::location::search_location,
             commands::photos::get_cached_photos,
             commands::photos::get_photo_details,
+            commands::photos::delete_cached_photo,
         ])
         .run(tauri::generate_context!())
         .expect("error while running Field Glass");
+}
+
+fn start_auto_refresh_loop() {
+    tauri::async_runtime::spawn(async move {
+        let mut ticker = tokio::time::interval(Duration::from_secs(60));
+        let mut last_refresh_attempt: Option<std::time::Instant> = None;
+
+        loop {
+            ticker.tick().await;
+
+            let settings_path = match Settings::default_path() {
+                Ok(path) => path,
+                Err(e) => {
+                    tracing::warn!(error = %e, "Failed to resolve settings path for auto-refresh");
+                    continue;
+                }
+            };
+
+            let settings = match Settings::load(&settings_path) {
+                Ok(settings) => settings,
+                Err(e) => {
+                    tracing::warn!(error = %e, "Failed to load settings for auto-refresh");
+                    continue;
+                }
+            };
+
+            let interval_minutes = settings.cache_refresh_interval_minutes;
+            if interval_minutes == 0 {
+                continue;
+            }
+
+            let should_refresh = match last_refresh_attempt {
+                Some(instant) => {
+                    instant.elapsed() >= Duration::from_secs(u64::from(interval_minutes) * 60)
+                }
+                None => true,
+            };
+
+            if !should_refresh {
+                continue;
+            }
+
+            last_refresh_attempt = Some(std::time::Instant::now());
+
+            match crate::commands::cache::refresh_cache().await {
+                Ok(status) => tracing::info!(
+                    total = status.total_photos,
+                    required = status.required_photos,
+                    "Auto cache refresh complete"
+                ),
+                Err(e) => tracing::warn!(error = %e, "Auto cache refresh failed"),
+            }
+        }
+    });
 }
