@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Field Glass — WiX v4 MSI Installer
+
+  Installs (per-machine, requires admin):
+    • FieldGlass.scr   → C:\Windows\System32
+    • Field Glass.exe    → C:\Program Files\Field Glass\
+    • Start Menu shortcuts  → Field Glass folder
+
+  Post-install:
+    • Launches Field Glass (on install and upgrade)
+    • Opens Windows Screen Saver Settings (first install only)
+
+  The .scr finds the companion via its existing discovery logic in config.rs:
+    1. Sidecar file next to .scr (not used by MSI — not needed)
+    2. Known companion filenames next to .scr
+    3. %ProgramFiles%\Field Glass\Field Glass.exe  ← MSI installs here
+
+  Build (see build-installer.ps1 for the automated version):
+    wix build Product.wxs ^
+      -arch x64 ^
+      -ext WixToolset.UI.wixext ^
+      -d ProductVersion=0.1.0.0 ^
+      -d ScrPath=...\dist\windows\FieldGlass.scr ^
+      -d CompanionPath=..\..\target\release\inat-companion.exe ^
+      -d IconPath=..\..\crates\inat-companion\icons\icon.ico ^
+      -d LicensePath=License.rtf ^
+      -o ...\dist\windows\FieldGlass.msi
+-->
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs"
+     xmlns:ui="http://wixtoolset.org/schemas/v4/wxs/ui">
+
+  <Package Name="Field Glass"
+           Manufacturer="Field Glass"
+           Version="$(var.ProductVersion)"
+           UpgradeCode="e8c5a829-7a2d-4b3f-9c1e-5d6f8a0b2c4e"
+           Compressed="yes"
+           InstallerVersion="500"
+           Scope="perMachine">
+
+    <SummaryInformation
+      Description="Nature photos from iNaturalist as your Windows screensaver, with proper Creative Commons attribution." />
+
+    <!-- Handles version upgrades: removes previous version before installing new.
+         Blocks downgrades with a user-friendly message. -->
+    <MajorUpgrade
+      DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
+
+    <!-- Embed all files in the MSI for a single-file installer. -->
+    <MediaTemplate EmbedCab="yes" CompressionLevel="high" />
+
+    <!-- ================================================================ -->
+    <!-- DIRECTORIES & COMPONENTS                                         -->
+    <!-- ================================================================ -->
+
+    <!-- Screensaver .scr → C:\Windows\System32
+         Windows enumerates .scr files in System32 for the Screen Saver Settings
+         dialog. This is the standard location for system-wide screensavers. -->
+    <StandardDirectory Id="System64Folder">
+      <Component Id="ScreensaverFile" Guid="*" Bitness="always64">
+        <File Id="ScreensaverScr"
+              Source="$(var.ScrPath)"
+              Name="FieldGlass.scr"
+              KeyPath="yes" />
+      </Component>
+    </StandardDirectory>
+
+    <!-- Companion app → C:\Program Files\Field Glass\
+         The companion is a Tauri system-tray app that manages API settings,
+         photo caching, and provides a configuration UI for the screensaver. -->
+    <StandardDirectory Id="ProgramFiles64Folder">
+      <Directory Id="INSTALLFOLDER" Name="Field Glass">
+        <Component Id="CompanionApp" Guid="*" Bitness="always64">
+          <File Id="CompanionExe"
+                Source="$(var.CompanionPath)"
+                Name="Field Glass.exe"
+                KeyPath="yes" />
+        </Component>
+      </Directory>
+    </StandardDirectory>
+
+    <!-- Start Menu shortcuts → Field Glass folder -->
+    <StandardDirectory Id="ProgramMenuFolder">
+      <Directory Id="ShortcutsFolder" Name="Field Glass">
+        <Component Id="StartMenuShortcuts" Guid="*">
+          <Shortcut Id="CompanionShortcut"
+                    Name="Field Glass"
+                    Description="Configure Field Glass settings"
+                    Target="[INSTALLFOLDER]Field Glass.exe"
+                    WorkingDirectory="INSTALLFOLDER" />
+          <Shortcut Id="SettingsShortcut"
+                    Name="Screen Saver Settings"
+                    Description="Open Windows Screen Saver Settings"
+                    Target="[System64Folder]rundll32.exe"
+                    Arguments="shell32.dll,Control_RunDLL desk.cpl,,1" />
+          <RemoveFolder Id="RemoveShortcutsFolder" On="uninstall" />
+          <!-- WiX requires a registry KeyPath for shortcut components
+               (shortcuts alone can't serve as KeyPath). -->
+          <RegistryValue Root="HKCU"
+                         Key="Software\Field Glass"
+                         Name="ShortcutsInstalled"
+                         Type="integer"
+                         Value="1"
+                         KeyPath="yes" />
+        </Component>
+      </Directory>
+    </StandardDirectory>
+
+    <!-- ================================================================ -->
+    <!-- FEATURES                                                         -->
+    <!-- ================================================================ -->
+
+    <Feature Id="Complete" Title="Field Glass" Level="1"
+             Description="Installs the screensaver and companion configuration app.">
+      <ComponentRef Id="ScreensaverFile" />
+      <ComponentRef Id="CompanionApp" />
+      <ComponentRef Id="StartMenuShortcuts" />
+    </Feature>
+
+    <!-- ================================================================ -->
+    <!-- CUSTOM ACTIONS — Post-install launch                             -->
+    <!-- ================================================================ -->
+
+    <!-- Launch companion app (Type 18: run installed file).
+         asyncNoWait = fire-and-forget, don't block the installer. -->
+    <CustomAction Id="LaunchCompanion"
+                  FileRef="CompanionExe"
+                  ExeCommand=""
+                  Return="asyncNoWait" />
+
+    <!-- Resolve control.exe path at runtime (Type 51: set property).
+         [System64Folder] is an MSI formatted reference resolved by the engine. -->
+    <CustomAction Id="SetScreenSaverSettingsCmd"
+                  Property="SCREENSAVER_SETTINGS_CMD"
+                  Value="[System64Folder]control.exe" />
+
+    <!-- Open Screen Saver Settings (Type 50: run EXE from property).
+         desk.cpl,,1 opens the Screen Saver tab of Display Properties. -->
+    <CustomAction Id="OpenScreenSaverSettings"
+                  Property="SCREENSAVER_SETTINGS_CMD"
+                  ExeCommand="desk.cpl,,1"
+                  Return="asyncNoWait" />
+
+    <InstallExecuteSequence>
+      <!-- Launch companion on install and upgrade (not uninstall).
+           Scheduled after InstallFinalize so all files are committed. -->
+      <Custom Action="LaunchCompanion" After="InstallFinalize"
+              Condition="NOT REMOVE~=&quot;ALL&quot;" />
+      <!-- Set the property for screen saver settings command -->
+      <Custom Action="SetScreenSaverSettingsCmd" After="LaunchCompanion"
+              Condition="NOT Installed" />
+      <!-- Open screen saver settings on first install only.
+           On upgrade, user has presumably already configured it. -->
+      <Custom Action="OpenScreenSaverSettings" After="SetScreenSaverSettingsCmd"
+              Condition="NOT Installed" />
+    </InstallExecuteSequence>
+    <!-- ================================================================ -->
+    <!-- UI                                                               -->
+    <!-- ================================================================ -->
+
+    <!-- WixUI_Minimal: simple wizard with license → progress → finish.
+         No directory selection needed (fixed install locations). -->
+    <ui:WixUI Id="WixUI_Minimal" />
+    <WixVariable Id="WixUILicenseRtf" Value="$(var.LicensePath)" />
+
+    <!-- Add/Remove Programs entry: icon and metadata -->
+    <Icon Id="AppIcon" SourceFile="$(var.IconPath)" />
+    <Property Id="ARPPRODUCTICON" Value="AppIcon" />
+
+  </Package>
+</Wix>
