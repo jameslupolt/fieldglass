@@ -202,10 +202,8 @@ impl Drop for State {
 /// 3. Load the first cached photo and begin cycling via `WM_TIMER`.
 /// 4. Exit on any user input (mouse / keyboard).
 pub fn run() -> Result<()> {
-    let instance_mutex = unsafe { CreateMutexW(None, true, w!("FieldGlass.Screensaver.Singleton")) };
-    if instance_mutex.is_invalid() {
-        anyhow::bail!("CreateMutexW failed");
-    }
+    let instance_mutex = unsafe { CreateMutexW(None, true, w!("FieldGlass.Screensaver.Singleton")) }
+        .context("CreateMutexW failed")?;
     if unsafe { GetLastError() } == ERROR_ALREADY_EXISTS {
         unsafe {
             let _ = CloseHandle(instance_mutex);
