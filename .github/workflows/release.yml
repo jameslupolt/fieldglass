@@ -38,7 +38,7 @@ jobs:
       - name: Install WiX v4 CLI
         run: |
           dotnet tool install --global wix
-          wix extension add WixToolset.UI.wixext
+          wix extension add WixToolset.UI.wixext/6.0.2
 
       - name: Cache cargo registry & build
         uses: actions/cache@v4
