@@ -1,0 +1,6 @@
+# Cargo aliases — `cargo b` and `cargo r` build in release mode by default.
+# Use `cargo build` / `cargo run` (unaliased) for dev profile when needed.
+
+[alias]
+b = "build --release"
+r = "run --release"

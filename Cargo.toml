@@ -1,0 +1,79 @@
+[workspace]
+resolver = "2"
+members = [
+    "crates/inat-core",
+    "crates/inat-scr-windows",
+    "crates/inat-companion",
+]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+license = "MIT"
+repository = "https://github.com/jameslupolt/fieldglass"
+
+[workspace.dependencies]
+# Serialization
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+
+# Async runtime
+tokio = { version = "1", features = ["full"] }
+
+# HTTP
+reqwest = { version = "0.13", features = ["rustls", "json"] }
+url = "2"
+
+# Database
+rusqlite = { version = "0.38", features = ["bundled"] }
+
+# Error handling
+thiserror = "2"
+anyhow = "1"
+
+# Time
+chrono = { version = "0.4", features = ["serde"] }
+
+# Identifiers
+uuid = { version = "1", features = ["v4", "serde"] }
+
+# Platform paths
+directories = "6"
+
+# Rate limiting
+governor = "0.10"
+
+# Logging
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+
+# Randomization
+rand = "0.9"
+
+# Shared core
+inat-core = { path = "crates/inat-core" }
+
+# -- Build profiles ----------------------------------------------------------
+
+# Dev builds: strip debug symbols to avoid 20 GB+ target/ directories.
+# Full debugging is still available via `cargo build --profile debug-full`.
+[profile.dev]
+debug = "line-tables-only"   # enough for backtraces, ~70% smaller artifacts
+split-debuginfo = "packed"   # single .pdb / .dSYM instead of per-crate
+
+# Dependencies are always built optimised, even in dev.
+# Faster runtime + smaller output; compile time is amortised by caching.
+[profile.dev.package."*"]
+opt-level = 2
+
+# Escape hatch: full debug info when you actually need a debugger.
+[profile.debug-full]
+inherits = "dev"
+debug = true
+split-debuginfo = "off"
+
+# Release: strip symbols + LTO for smallest final binary.
+[profile.release]
+strip = true
+lto = "thin"
+codegen-units = 1

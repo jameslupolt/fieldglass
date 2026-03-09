@@ -1,0 +1,41 @@
+# Rust
+target/
+
+# Node
+node_modules/
+dist/
+.turbo/
+
+# macOS
+.DS_Store
+*.xcuserdata/
+*.xcworkspace/
+DerivedData/
+build/
+
+# Windows
+*.exe
+*.scr
+*.dll
+*.pdb
+*.msi
+*.wixpdb
+thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Environment
+.env
+.env.local
+
+# Tauri
+
+# WiX
+.wix/
+
+# Build logs
+error.out
