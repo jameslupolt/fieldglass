@@ -1,11 +1,11 @@
 //! Tauri command for taxa autocomplete search.
 //!
-//! Delegates to `inat_core::ApiClient::search_taxa`, which calls the
+//! Delegates to `fieldglass_core::ApiClient::search_taxa`, which calls the
 //! iNaturalist taxa/autocomplete endpoint. The React frontend never
 //! makes network requests directly.
 
-use inat_core::types::Taxon;
-use inat_core::ApiClient;
+use fieldglass_core::types::Taxon;
+use fieldglass_core::ApiClient;
 
 /// Search iNaturalist taxa by name (autocomplete).
 ///

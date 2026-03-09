@@ -17,7 +17,7 @@ use windows::Win32::UI::WindowsAndMessaging::{
     SetWindowLongPtrW, TranslateMessage, GWLP_USERDATA, GWLP_WNDPROC, MSG, WNDPROC,
 };
 
-const PREVIEW_LABEL: &str = "iNaturalist\nScreensaver";
+const PREVIEW_LABEL: &str = "Field Glass\nScreensaver";
 
 /// WM_PAINT constant (windows-rs may export as u32 or WINDOW_MESSAGE).
 const WM_PAINT_ID: u32 = 0x000F;

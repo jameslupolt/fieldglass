@@ -1,12 +1,12 @@
 [package]
-name = "inat-core"
+name = "fieldglass-core"
 description = "Shared core library for Field Glass — API client, cache, selection, metadata"
 version.workspace = true
 edition.workspace = true
 license.workspace = true
 
 [lib]
-name = "inat_core"
+name = "fieldglass_core"
 
 [dependencies]
 serde = { workspace = true }

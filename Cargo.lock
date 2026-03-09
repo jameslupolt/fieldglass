@@ -881,6 +881,62 @@ dependencies = [
 ]
 
 [[package]]
+name = "fieldglass-companion"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "chrono",
+ "fieldglass-core",
+ "reqwest 0.13.2",
+ "serde",
+ "serde_json",
+ "tauri",
+ "tauri-build",
+ "tauri-plugin-autostart",
+ "tauri-plugin-shell",
+ "tauri-plugin-store",
+ "tokio",
+ "tracing",
+ "tracing-subscriber",
+]
+
+[[package]]
+name = "fieldglass-core"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "chrono",
+ "directories",
+ "governor",
+ "rand 0.9.2",
+ "reqwest 0.13.2",
+ "rusqlite",
+ "serde",
+ "serde_json",
+ "tempfile",
+ "thiserror 2.0.18",
+ "tokio",
+ "tracing",
+ "tracing-subscriber",
+ "url",
+ "uuid",
+]
+
+[[package]]
+name = "fieldglass-scr-windows"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "fieldglass-core",
+ "image",
+ "serde",
+ "serde_json",
+ "tracing",
+ "tracing-subscriber",
+ "windows",
+]
+
+[[package]]
 name = "find-msvc-tools"
 version = "0.1.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1768,62 +1824,6 @@ dependencies = [
  "png",
  "qoi",
  "tiff",
-]
-
-[[package]]
-name = "inat-companion"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "chrono",
- "inat-core",
- "reqwest 0.13.2",
- "serde",
- "serde_json",
- "tauri",
- "tauri-build",
- "tauri-plugin-autostart",
- "tauri-plugin-shell",
- "tauri-plugin-store",
- "tokio",
- "tracing",
- "tracing-subscriber",
-]
-
-[[package]]
-name = "inat-core"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "chrono",
- "directories",
- "governor",
- "rand 0.9.2",
- "reqwest 0.13.2",
- "rusqlite",
- "serde",
- "serde_json",
- "tempfile",
- "thiserror 2.0.18",
- "tokio",
- "tracing",
- "tracing-subscriber",
- "url",
- "uuid",
-]
-
-[[package]]
-name = "inat-scr-windows"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "image",
- "inat-core",
- "serde",
- "serde_json",
- "tracing",
- "tracing-subscriber",
- "windows",
 ]
 
 [[package]]

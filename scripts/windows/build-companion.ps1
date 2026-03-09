@@ -7,7 +7,7 @@ $ErrorActionPreference = "Stop"
 
 $repoRoot = Resolve-Path (Join-Path $PSScriptRoot "..\..")
 $frontendDir = Join-Path $repoRoot "frontend"
-$tauriDir = Join-Path $repoRoot "crates\inat-companion"
+$tauriDir = Join-Path $repoRoot "crates\fieldglass-companion"
 
 # 1. Build frontend assets (unless skipped)
 if (-not $SkipFrontend) {
@@ -39,7 +39,7 @@ finally {
 }
 
 # 3. Verify output
-$releaseBinary = Join-Path $repoRoot "target\release\inat-companion.exe"
+$releaseBinary = Join-Path $repoRoot "target\release\fieldglass-companion.exe"
 if (-not (Test-Path $releaseBinary)) {
     throw "Expected release binary not found: $releaseBinary"
 }

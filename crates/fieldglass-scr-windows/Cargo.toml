@@ -1,5 +1,5 @@
 [package]
-name = "inat-scr-windows"
+name = "fieldglass-scr-windows"
 description = "Windows .scr screensaver host for Field Glass"
 version.workspace = true
 edition.workspace = true
@@ -10,7 +10,7 @@ name = "FieldGlass"
 path = "src/main.rs"
 
 [dependencies]
-inat-core = { workspace = true }
+fieldglass-core = { workspace = true }
 anyhow = { workspace = true }
 tracing = { workspace = true }
 tracing-subscriber = { workspace = true }

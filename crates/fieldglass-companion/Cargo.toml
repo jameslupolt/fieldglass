@@ -1,5 +1,5 @@
 [package]
-name = "inat-companion"
+name = "fieldglass-companion"
 version.workspace = true
 edition.workspace = true
 license.workspace = true
@@ -19,7 +19,7 @@ tauri-plugin-autostart = "2"
 tauri-plugin-store = "2"
 
 # Shared core library
-inat-core.workspace = true
+fieldglass-core.workspace = true
 
 # Serialization
 serde.workspace = true

@@ -41,8 +41,8 @@ $distDir = Join-Path $repoRoot "dist\windows"
 
 # Artifact paths
 $scrPath = Join-Path $distDir "FieldGlass.scr"
-$companionPath = Join-Path $repoRoot "target\release\inat-companion.exe"
-$iconPath = Join-Path $repoRoot "crates\inat-companion\icons\icon.ico"
+$companionPath = Join-Path $repoRoot "target\release\fieldglass-companion.exe"
+$iconPath = Join-Path $repoRoot "crates\fieldglass-companion\icons\icon.ico"
 $licensePath = Join-Path $installerDir "License.rtf"
 $wxsPath = Join-Path $installerDir "Product.wxs"
 $msiPath = Join-Path $distDir "FieldGlass.msi"

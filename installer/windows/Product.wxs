@@ -22,8 +22,8 @@
       -ext WixToolset.UI.wixext ^
       -d ProductVersion=0.1.0.0 ^
       -d ScrPath=...\dist\windows\FieldGlass.scr ^
-      -d CompanionPath=..\..\target\release\inat-companion.exe ^
-      -d IconPath=..\..\crates\inat-companion\icons\icon.ico ^
+      -d CompanionPath=..\..\target\release\fieldglass-companion.exe ^
+      -d IconPath=..\..\crates\fieldglass-companion\icons\icon.ico ^
       -d LicensePath=License.rtf ^
       -o ...\dist\windows\FieldGlass.msi
 -->

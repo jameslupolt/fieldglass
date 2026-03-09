@@ -3,7 +3,7 @@
 //! Settings are persisted as JSON in the app data directory. The companion
 //! app is the sole writer; screensaver hosts read the same file.
 
-use inat_core::Settings;
+use fieldglass_core::Settings;
 
 /// Return the current settings (defaults if no file exists).
 #[tauri::command]

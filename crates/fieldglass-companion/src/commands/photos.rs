@@ -4,8 +4,8 @@
 //! details view. These commands read from the cache (SQLite + filesystem)
 //! without any network access.
 
-use inat_core::types::CachedPhoto;
-use inat_core::CacheManager;
+use fieldglass_core::types::CachedPhoto;
+use fieldglass_core::CacheManager;
 
 /// Return all cached photos for the preview grid / list.
 ///

@@ -1,4 +1,4 @@
-// TypeScript interfaces mirroring Rust types from inat-core.
+// TypeScript interfaces mirroring Rust types from fieldglass-core.
 // The React frontend uses these types exclusively — it never constructs
 // its own network types or filesystem types.
 

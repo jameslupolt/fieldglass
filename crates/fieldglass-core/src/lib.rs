@@ -1,4 +1,4 @@
-//! # inat-core
+//! # fieldglass-core
 //!
 //! Shared core library for Field Glass. All network access,
 //! data processing, and cache management lives here. Neither the screensaver

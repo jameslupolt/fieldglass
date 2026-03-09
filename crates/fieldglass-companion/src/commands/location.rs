@@ -1,12 +1,12 @@
 //! Tauri command for geocoding (location search).
 //!
-//! Delegates to `inat_core::api::geocoding` which supports both Photon
+//! Delegates to `fieldglass_core::api::geocoding` which supports both Photon
 //! (default, autocomplete-friendly) and Nominatim (fallback) backends.
 //! The geocoder backend is selected from user settings.
 
-use inat_core::api::geocoding::create_geocoder;
-use inat_core::types::GeocodingResult;
-use inat_core::{ApiClient, Settings};
+use fieldglass_core::api::geocoding::create_geocoder;
+use fieldglass_core::types::GeocodingResult;
+use fieldglass_core::{ApiClient, Settings};
 
 /// Search for a location by name (city/region autocomplete).
 ///
