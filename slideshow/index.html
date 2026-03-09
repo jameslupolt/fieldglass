@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Field Glass</title>
+  <link rel="stylesheet" href="slideshow.css">
+</head>
+<body>
+  <!-- Photo layers: two stacked for crossfade. Only one is visible at a time. -->
+  <div id="slideshow">
+    <div class="slide active" id="slide-a">
+      <img class="slide-img" id="img-a" alt="">
+    </div>
+    <div class="slide" id="slide-b">
+      <img class="slide-img" id="img-b" alt="">
+    </div>
+  </div>
+
+  <!-- Attribution overlay — always visible at bottom -->
+  <div id="overlay">
+    <div class="overlay-row">
+      <span id="species-common" class="species-common"></span>
+      <span id="species-scientific" class="species-scientific"></span>
+    </div>
+    <div class="overlay-row attribution-row">
+      <span id="creator" class="creator"></span>
+      <span id="license" class="license"></span>
+      <span id="place" class="place"></span>
+      <span class="source">iNaturalist.org</span>
+    </div>
+  </div>
+
+  <script src="slideshow.js"></script>
+</body>
+</html>

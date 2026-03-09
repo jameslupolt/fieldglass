@@ -1,0 +1,28 @@
+[package]
+name = "inat-scr-windows"
+description = "Windows .scr screensaver host for Field Glass"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[[bin]]
+name = "FieldGlass"
+path = "src/main.rs"
+
+[dependencies]
+inat-core = { workspace = true }
+anyhow = { workspace = true }
+tracing = { workspace = true }
+tracing-subscriber = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+image = "0.24"
+
+[target.'cfg(windows)'.dependencies]
+windows = { version = "0.61", features = [
+    "Win32_Foundation",
+    "Win32_UI_WindowsAndMessaging",
+    "Win32_Graphics_Gdi",
+    "Win32_System_LibraryLoader",
+    "Win32_UI_HiDpi",
+] }
