@@ -174,10 +174,10 @@ pub async fn refresh_cache() -> Result<CacheStatus, String> {
                     .unwrap_or("Unknown License");
 
                 // Skip ND-licensed photos if using fill mode
-                if settings.aspect_ratio_mode == inat_core::types::AspectRatioMode::Fill {
-                    if license.is_some_and(|l| l.is_no_derivatives()) {
-                        continue;
-                    }
+                if settings.aspect_ratio_mode == inat_core::types::AspectRatioMode::Fill
+                    && license.is_some_and(|l| l.is_no_derivatives())
+                {
+                    continue;
                 }
 
                 // Build attribution text

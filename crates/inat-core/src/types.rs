@@ -314,10 +314,11 @@ pub struct Location {
 // ---------------------------------------------------------------------------
 
 /// Search radius presets in kilometers.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize)]
 pub enum SearchRadius {
     Km10,
     Km25,
+    #[default]
     Km50,
     Km100,
 }
@@ -333,28 +334,19 @@ impl SearchRadius {
     }
 }
 
-impl Default for SearchRadius {
-    fn default() -> Self {
-        Self::Km50
-    }
-}
 
 // ---------------------------------------------------------------------------
 // Display settings
 // ---------------------------------------------------------------------------
 
 /// How to fit photos to the screen.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum AspectRatioMode {
     /// Contain with letterbox (black bars). Preserves ND license compatibility.
+    #[default]
     Contain,
     /// Crop to fill. Excludes ND-licensed photos.
     Fill,
 }
 
-impl Default for AspectRatioMode {
-    fn default() -> Self {
-        Self::Contain
-    }
-}
