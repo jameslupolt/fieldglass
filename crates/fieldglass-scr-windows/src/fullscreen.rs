@@ -25,11 +25,11 @@ use windows::Win32::System::Threading::CreateMutexW;
 use windows::Win32::UI::HiDpi::{SetProcessDpiAwareness, PROCESS_SYSTEM_DPI_AWARE};
 use windows::Win32::UI::WindowsAndMessaging::*;
 
-use inat_core::config::Settings;
-use inat_core::types::AspectRatioMode;
-use inat_core::CacheManager;
-use inat_core::CachedPhoto;
-use inat_core::PhotoLicense;
+use fieldglass_core::config::Settings;
+use fieldglass_core::types::AspectRatioMode;
+use fieldglass_core::CacheManager;
+use fieldglass_core::CachedPhoto;
+use fieldglass_core::PhotoLicense;
 
 thread_local! {
     static WINDOW_HWNDS: RefCell<Vec<HWND>> = const { RefCell::new(Vec::new()) };

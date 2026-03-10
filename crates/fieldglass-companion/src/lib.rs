@@ -10,12 +10,16 @@ mod tray;
 
 use std::time::Duration;
 
-use inat_core::Settings;
+use fieldglass_core::Settings;
 use tracing_subscriber::EnvFilter;
 
 pub fn run() {
     tracing_subscriber::fmt()
-        .with_env_filter(EnvFilter::from_default_env().add_directive("inat=info".parse().unwrap()))
+        .with_env_filter(
+            EnvFilter::from_default_env()
+                .add_directive("fieldglass_core=info".parse().unwrap())
+                .add_directive("fieldglass_companion=info".parse().unwrap()),
+        )
         .init();
 
     tauri::Builder::default()

@@ -3,12 +3,12 @@
 use chrono::Utc;
 use std::collections::HashSet;
 
-use inat_core::api::observations::ObservationQuery;
-use inat_core::cache::CacheStatus;
-use inat_core::selection::diversity::{DiversityScorer, select_top_n};
-use inat_core::selection::filter::{AnnotationFilter, filter_observations};
-use inat_core::types::CachedPhoto;
-use inat_core::{ApiClient, CacheManager, PhotoLicense, Settings};
+use fieldglass_core::api::observations::ObservationQuery;
+use fieldglass_core::cache::CacheStatus;
+use fieldglass_core::selection::diversity::{DiversityScorer, select_top_n};
+use fieldglass_core::selection::filter::{AnnotationFilter, filter_observations};
+use fieldglass_core::types::CachedPhoto;
+use fieldglass_core::{ApiClient, CacheManager, PhotoLicense, Settings};
 
 /// Return the current cache status (photo count, required count, disk usage).
 #[tauri::command]
@@ -174,7 +174,7 @@ pub async fn refresh_cache() -> Result<CacheStatus, String> {
                     .unwrap_or("Unknown License");
 
                 // Skip ND-licensed photos if using fill mode
-                if settings.aspect_ratio_mode == inat_core::types::AspectRatioMode::Fill
+                if settings.aspect_ratio_mode == fieldglass_core::types::AspectRatioMode::Fill
                     && license.is_some_and(|l| l.is_no_derivatives())
                 {
                     continue;

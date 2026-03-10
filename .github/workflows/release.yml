@@ -59,13 +59,13 @@ jobs:
       # Build screensaver .scr (release)
       - name: Build screensaver
         run: |
-          cargo build -p inat-scr-windows --release
+          cargo build -p fieldglass-scr-windows --release
           New-Item -ItemType Directory -Force -Path dist\windows | Out-Null
           Copy-Item target\release\FieldGlass.exe dist\windows\FieldGlass.scr
 
       # Build companion app (Tauri release)
       - name: Build companion app
-        working-directory: crates/inat-companion
+        working-directory: crates/fieldglass-companion
         run: cargo tauri build
 
       # Build MSI installer
@@ -76,8 +76,8 @@ jobs:
             -ext WixToolset.UI.wixext `
             -d "ProductVersion=${{ steps.version.outputs.version }}.0" `
             -d "ScrPath=dist\windows\FieldGlass.scr" `
-            -d "CompanionPath=target\release\inat-companion.exe" `
-            -d "IconPath=crates\inat-companion\icons\icon.ico" `
+            -d "CompanionPath=target\release\fieldglass-companion.exe" `
+            -d "IconPath=crates\fieldglass-companion\icons\icon.ico" `
             -d "LicensePath=installer\windows\License.rtf" `
             -o "dist\windows\FieldGlass-${{ steps.version.outputs.version }}.msi"
 

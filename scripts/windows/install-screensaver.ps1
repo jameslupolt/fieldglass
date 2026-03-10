@@ -24,10 +24,10 @@ function Resolve-CompanionPath {
 
     # Prefer release builds — debug Tauri binaries need a dev server running
     $candidates = @(
-        (Join-Path $RepoRoot "target\release\inat-companion.exe"),
-        (Join-Path $RepoRoot "target\debug\inat-companion.exe"),
-        (Join-Path $RepoRoot "crates\inat-companion\target\release\inat-companion.exe"),
-        (Join-Path $RepoRoot "crates\inat-companion\target\debug\inat-companion.exe")
+        (Join-Path $RepoRoot "target\release\fieldglass-companion.exe"),
+        (Join-Path $RepoRoot "target\debug\fieldglass-companion.exe"),
+        (Join-Path $RepoRoot "crates\fieldglass-companion\target\release\fieldglass-companion.exe"),
+        (Join-Path $RepoRoot "crates\fieldglass-companion\target\debug\fieldglass-companion.exe")
     )
 
     if ($env:LOCALAPPDATA) {

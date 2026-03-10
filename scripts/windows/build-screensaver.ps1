@@ -6,7 +6,7 @@ param(
 $ErrorActionPreference = "Stop"
 
 $repoRoot = Resolve-Path (Join-Path $PSScriptRoot "..\..")
-$crateDir = Join-Path $repoRoot "crates\inat-scr-windows"
+$crateDir = Join-Path $repoRoot "crates\fieldglass-scr-windows"
 $targetDir = Join-Path $repoRoot "target"
 $profile = if ($Release) { "release" } else { "debug" }
 
@@ -14,7 +14,7 @@ Write-Host "Building Windows screensaver host ($profile)..." -ForegroundColor Cy
 
 Push-Location $repoRoot
 try {
-    $cargoArgs = @("build", "-p", "inat-scr-windows")
+    $cargoArgs = @("build", "-p", "fieldglass-scr-windows")
     if ($Release) {
         $cargoArgs += "--release"
     }

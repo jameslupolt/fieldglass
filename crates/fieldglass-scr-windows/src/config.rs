@@ -16,9 +16,7 @@ use std::process::Command;
 /// 1. Try to find an existing companion window and bring it to front.
 /// 2. If not found, launch the companion app executable.
 pub fn open_companion() -> Result<()> {
-    let titles = [
-        windows::core::w!("Field Glass"),
-    ];
+    let titles = [windows::core::w!("Field Glass")];
 
     for title in titles {
         let hwnd = unsafe { FindWindowW(None, title) };
@@ -62,9 +60,7 @@ pub fn open_companion() -> Result<()> {
         "Field Glass.exe",
         "field-glass.exe",
         "FieldGlass.exe",
-        "iNat Companion.exe",
-        "inat-companion.exe",
-        "iNatCompanion.exe",
+        "fieldglass-companion.exe",
     ];
 
     for name in &companion_names {

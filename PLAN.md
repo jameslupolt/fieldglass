@@ -37,7 +37,7 @@ The product is **not** a single binary. It consists of three components sharing 
 
 | Component | Purpose | Technology | Consumes Core Via |
 |-----------|---------|------------|-------------------|
-| **Shared Rust Core** | API access, image cache, selection/diversity scoring, metadata, settings persistence | Rust library crate (`inat-core`) | — |
+| **Shared Rust Core** | API access, image cache, selection/diversity scoring, metadata, settings persistence | Rust library crate (`fieldglass-core`) | — |
 | **macOS Screensaver Host** | Native `.saver` plugin — full OS screensaver lifecycle, preview, configuration hook | Swift + (WKWebView or Core Animation; decided by prototype) | Direct disk reads (cache directory + SQLite metadata) |
 | **Windows Screensaver Host** | Native `.scr` — handles `/s`, `/c`, `/p HWND` protocol correctly | Rust binary + WebView2 | Direct crate dependency |
 | **Tauri Companion App** | Settings UI, preview, cache management, tray icon, background refresh, auto-updates | Tauri v2 + React + TypeScript | Direct crate dependency |
@@ -52,7 +52,7 @@ The previous plan proposed a single Tauri binary with thin OS "shims" for screen
 
 3. **Separation of concerns**: The screensaver hosts need minimal permissions and tiny footprints. The companion app needs network access, filesystem access, tray integration, and a rich settings UI. These are fundamentally different security profiles.
 
-### Shared Rust Core (`inat-core`)
+### Shared Rust Core (`fieldglass-core`)
 
 All network access, data processing, and cache management lives here. Neither the screensaver hosts nor the React frontend make any network requests directly.
 
@@ -165,7 +165,7 @@ A Rust binary compiled as a `.scr` (renamed `.exe`).
 | API | **iNaturalist API v1** (no auth) | Public read-only |
 | Geocoding | **Photon** (photon.komoot.io), runtime-configurable | Free, no API key, search-as-you-type. Nominatim as fallback. Geocoder backend must be switchable at runtime without a software update (per OSMF policy for Nominatim fallback). |
 | FFI tooling | **cbindgen** (deferred to post-v1) | For future C FFI if macOS host needs live Rust calls. v1 uses direct disk reads. |
-| Build workspace | **Cargo workspace** | Multi-crate: `inat-core`, `inat-companion` (Tauri), `inat-scr-windows` |
+| Build workspace | **Cargo workspace** | Multi-crate: `fieldglass-core`, `fieldglass-companion` (Tauri), `fieldglass-scr-windows` |
 | macOS build | **Xcode project** | Builds the `.saver` bundle |
 | CI/CD | **GitHub Actions** | Automated cross-platform builds, release artifacts |
 
@@ -356,7 +356,7 @@ Every displayed photo **must** show:
 
 ### Geocoding Architecture
 
-The geocoder is implemented as a **`Geocoder` trait** in `inat-core` with pluggable backends. The active backend must be **switchable at runtime** (via settings config) without requiring a software update. This is an explicit OSMF operational requirement for any app that uses Nominatim as a fallback.
+The geocoder is implemented as a **`Geocoder` trait** in `fieldglass-core` with pluggable backends. The active backend must be **switchable at runtime** (via settings config) without requiring a software update. This is an explicit OSMF operational requirement for any app that uses Nominatim as a fallback.
 
 #### Primary: Photon (by Komoot)
 
@@ -543,7 +543,7 @@ All settings are in the Tauri companion app. The React frontend is a **dumb rend
 inaturalist-screensaver/
 ├── Cargo.toml                           # Workspace root
 ├── crates/
-│   ├── inat-core/                       # Shared Rust core library
+│   ├── fieldglass-core/                 # Shared Rust core library
 │   │   ├── Cargo.toml                   # [lib] crate-type = ["lib"] (staticlib deferred to post-v1)
 │   │   ├── src/
 │   │   │   ├── lib.rs                   # Public API
@@ -570,8 +570,8 @@ inaturalist-screensaver/
 │   │   ├── cbindgen.toml                # C header generation config (deferred to post-v1)
 │   │   └── build.rs                     # Build script (future: C header generation)
 │   │
-│   ├── inat-companion/                  # Tauri companion app
-│   │   ├── Cargo.toml                   # Depends on inat-core
+│   ├── fieldglass-companion/            # Tauri companion app
+│   │   ├── Cargo.toml                   # Depends on fieldglass-core
 │   │   ├── tauri.conf.json
 │   │   ├── capabilities/               # Tauri v2 capability files
 │   │   │   ├── companion-window.json    # Full permissions
@@ -589,8 +589,8 @@ inaturalist-screensaver/
 │   │   │   └── tray.rs                  # System tray setup and menu
 │   │   └── icons/
 │   │
-│   └── inat-scr-windows/               # Windows .scr screensaver host
-│       ├── Cargo.toml                   # Depends on inat-core
+│   └── fieldglass-scr-windows/         # Windows .scr screensaver host
+│       ├── Cargo.toml                   # Depends on fieldglass-core
 │       ├── src/
 │       │   ├── main.rs                  # Entry point: parse /s /c /p flags
 │       │   ├── fullscreen.rs            # /s mode: multi-monitor fullscreen
@@ -660,7 +660,7 @@ inaturalist-screensaver/
 
 2. **`frontend/`** is the React app used **only** by the Tauri companion. It is a dumb renderer — all logic flows through Tauri commands to the Rust backend.
 
-3. **`crates/inat-core/`** produces a Rust library crate. C FFI (`staticlib` + `cbindgen`) is deferred to post-v1 — the macOS `.saver` reads cached images and SQLite metadata directly from disk in v1, requiring no live Rust calls.
+3. **`crates/fieldglass-core/`** produces a Rust library crate. C FFI (`staticlib` + `cbindgen`) is deferred to post-v1 — the macOS `.saver` reads cached images and SQLite metadata directly from disk in v1, requiring no live Rust calls.
 
 4. **The React frontend has NO:**
    - API client (`api.ts`) — REMOVED
@@ -681,13 +681,13 @@ inaturalist-screensaver/
 cargo build --workspace
 
 # Build only the core library
-cargo build -p inat-core
+cargo build -p fieldglass-core
 
 # Build Windows .scr
-cargo build -p inat-scr-windows --release
+cargo build -p fieldglass-scr-windows --release
 
 # Build Tauri companion (includes frontend)
-cd crates/inat-companion && npm run tauri build
+cd crates/fieldglass-companion && npm run tauri build
 
 # Build macOS .saver (requires Xcode)
 cd macos && ./build-rust.sh && xcodebuild -project iNatScreenSaver.xcodeproj -scheme iNatScreenSaver
@@ -697,7 +697,7 @@ cd macos && ./build-rust.sh && xcodebuild -project iNatScreenSaver.xcodeproj -sc
 
 ```bash
 # Companion app development
-cd crates/inat-companion && npm run tauri dev
+cd crates/fieldglass-companion && npm run tauri dev
 
 # Run tests
 cargo test --workspace
