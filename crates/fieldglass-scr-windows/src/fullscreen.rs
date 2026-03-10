@@ -22,6 +22,9 @@ use windows::Win32::Foundation::*;
 use windows::Win32::Graphics::Gdi::*;
 use windows::Win32::System::LibraryLoader::GetModuleHandleW;
 use windows::Win32::System::Threading::CreateMutexW;
+use windows::Win32::System::RemoteDesktop::{
+    WTSRegisterSessionNotification, WTSUnRegisterSessionNotification,
+};
 use windows::Win32::UI::HiDpi::{SetProcessDpiAwareness, PROCESS_SYSTEM_DPI_AWARE};
 use windows::Win32::UI::WindowsAndMessaging::*;
 
@@ -54,6 +57,13 @@ const OVERLAY_MARGIN: i32 = 20;
 const OVERLAY_PADDING: i32 = 12;
 /// Background opacity for the attribution overlay (0–255).
 const OVERLAY_BG_ALPHA: u32 = 180;
+
+/// `WM_WTSSESSION_CHANGE` message (0x02B1). Sent after `WTSRegisterSessionNotification`.
+const WM_WTSSESSION_CHANGE: u32 = 0x02B1;
+/// Session has been locked (Ctrl+L, screen timeout, etc.).
+const WTS_SESSION_LOCK: usize = 0x7;
+/// Console has been disconnected (e.g. Remote Desktop switch).
+const WTS_CONSOLE_DISCONNECT: usize = 0x2;
 
 // ---------------------------------------------------------------------------
 // GDI image wrapper
@@ -313,6 +323,11 @@ pub fn run() -> Result<()> {
 
         register_window(hwnd);
 
+        // Register for session change notifications so we exit on screen lock
+        unsafe {
+            let _ = WTSRegisterSessionNotification(hwnd, 0); // NOTIFY_FOR_THIS_SESSION
+        }
+
         let screen_dc = unsafe { GetDC(Some(hwnd)) };
         let back_dc = unsafe { CreateCompatibleDC(Some(screen_dc)) };
         let back_bmp = unsafe { CreateCompatibleBitmap(screen_dc, screen_w, screen_h) };
@@ -423,6 +438,7 @@ unsafe extern "system" fn wndproc(hwnd: HWND, msg: u32, wparam: WPARAM, lparam: 
             if !ptr.is_null() {
                 drop(Box::from_raw(ptr));
             }
+            let _ = WTSUnRegisterSessionNotification(hwnd);
             unregister_window(hwnd);
             let has_windows = WINDOW_HWNDS.with(|windows| !windows.borrow().is_empty());
             if !has_windows {
@@ -492,6 +508,14 @@ unsafe extern "system" fn wndproc(hwnd: HWND, msg: u32, wparam: WPARAM, lparam: 
             WM_QUERYENDSESSION | WM_ENDSESSION => {
                 dismiss_all_windows();
                 LRESULT(1)
+            }
+
+            WM_WTSSESSION_CHANGE => {
+                if wparam.0 == WTS_SESSION_LOCK || wparam.0 == WTS_CONSOLE_DISCONNECT {
+                    tracing::debug!("Screensaver dismissed (session lock/disconnect)");
+                    dismiss_all_windows();
+                }
+                LRESULT(0)
             }
 
             _ => DefWindowProcW(hwnd, msg, wparam, lparam),
